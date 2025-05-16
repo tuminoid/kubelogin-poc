@@ -26,8 +26,16 @@ TL;DR: `./run.sh` creates Kind cluster and will setup everything for you.
 Read [the script](./run.sh) before running it, or do the steps one by one
 following the steps below.
 
-- `./run.sh password` to create cluster with password grant flow
-- `./run.sh device-code` to create cluster with device-code flow
+- `make run` or `./run.sh password` to create cluster with password grant flow
+- `make run-pkce` or `./run.sh device-code` to create cluster with device-code flow
+- `make clean` to clean up the cluster and oidc caches
+
+After setup is done, you can login with:
+
+- user `foo` + password `bar` for the normal user
+- user `customuser` '+ password `bar` for the admin user
+
+If you're not interested in how the setup happens, [skip to the end](#setup-kubectl).
 
 ### Kind setup
 
@@ -216,7 +224,7 @@ See [openldap.yaml](k8s/openldap.yaml).
 
 For reference, see [contents](k8s/openldap.txt) of openLDAP test database.
 
-### Setup kubectl
+## Setup kubectl
 
 Now we have technically everything in place, so let's advise kubectl
 to log us in.
@@ -251,7 +259,7 @@ Kubernetes Apiserver. Client can be configured to skip
 
 ```
 
-### Cluster roles
+## Cluster roles
 
 Cluster role needs to be assigned based on the username or the groups passed via
 the `groups` scope. These roles need to be configured by the pre-existing
