@@ -142,6 +142,7 @@ look like:
       - --oidc-extra-scope=email
       - --oidc-extra-scope=profile
       - --oidc-extra-scope=groups
+      - --oidc-extra-scope=offline_access
       - --grant-type=password
       - --insecure-skip-tls-verify
 ```
@@ -161,8 +162,8 @@ Read more:
 If we do not want to pass client-secret to the user (it has security
 implications), we lose the full headless CLI login experience, as we cannot use
 password grant anymore. Instead, we need to use `device-code` flow. This allows
-the user to login on another machine that is browser capable, and tie that login to
-one's own kubectl via the device-code.
+the user to login on another machine that is browser capable, and tie that login
+to one's own kubectl via the device-code.
 
 We need to adjust the `oauth2` configuration to have specific response types:
 
@@ -204,6 +205,7 @@ to look like:
       - --oidc-extra-scope=email
       - --oidc-extra-scope=profile
       - --oidc-extra-scope=groups
+      - --oidc-extra-scope=offline_access
       - --insecure-skip-tls-verify
       - --use-device-code
 ```
@@ -247,6 +249,8 @@ Kubernetes Apiserver. Client can be configured to skip
       --exec-arg=--oidc-extra-scope=email \
       --exec-arg=--oidc-extra-scope=profile \
       --exec-arg=--oidc-extra-scope=groups \
+      # for refresh tokens you need this
+      --exec-arg=---oidc-extra-scope=offline_access \
       --exec-arg=--insecure-skip-tls-verify \
       # for password grant you need these
       --exec-arg=--oidc-client-secret=kubelogin-test-secret \
@@ -268,7 +272,7 @@ cluster admin, otherwise users logging in via Dex won't have any permissions.
 ```yaml
 kubectl create clusterrolebinding oidc-cluster-admin \
   --clusterrole=cluster-admin \  # whatever the role should be
-  --user='Bar1'  # whatever the username-claim=email field defines username field is
+  --user='Bar1'  # whatever the username-claim=email field defines username is
 ```
 
 or better, you should configure group claim so each individual user does not
@@ -277,7 +281,7 @@ need separate role configured:
 ```yaml
 kubectl create clusterrolebinding oidc-dex-group \
   --clusterrole=dex \  # whatever the role should be
-  --group='readers'  # whatever the group-claim=groups field defines groups field is
+  --group='readers'  # whatever the group-claim=groups field defines groups is
 ```
 
 LDAP configuration would be different per organization regardless.
