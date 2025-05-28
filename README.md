@@ -125,8 +125,7 @@ We configure the client as a `staticClient` in
       secret: kubelogin-test-secret
 ```
 
-and the [kubelogin config](./kubeconfig.password.example) in kubeconfig needs to
-look like:
+and the kubeconfig should to look like:
 
 ```yaml
 - name: oidc
@@ -188,8 +187,7 @@ and the `staticClients` part will look like:
       - '/device/callback'
 ```
 
-and the [kubelogin config](./kubeconfig.device-code.example) in kubeconfig needs
-to look like:
+and the kubeconfig should look like:
 
 ```yaml
 - name: oidc
