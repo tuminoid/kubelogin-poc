@@ -24,8 +24,9 @@ sleep 20
 
 echo "applying dex-${TYPE}.yaml ..."
 kubectl apply -f "k8s/dex-${TYPE}.yaml"
-kubectl create secret tls dex.example.com.tls \
-    --cert=ssl/cert.pem --key=ssl/key.pem --namespace=dex
+echo "Creating Dex TLS secret..."
+kubectl -n dex create secret tls dex.127.0.0.1.nip.io.tls \
+    --cert="${SSLDIR}/dex.crt" --key="${SSLDIR}/dex.key"
 
 echo "applying openldap.yaml ..."
 kubectl apply -f k8s/openldap.yaml
@@ -52,7 +53,7 @@ if [[ "${TYPE}" == "password" ]]; then
         --exec-command=kubectl \
         --exec-arg=oidc-login \
         --exec-arg=get-token \
-        --exec-arg=--oidc-issuer-url=https://dex.example.com:32000 \
+        --exec-arg=--oidc-issuer-url=https://dex.127.0.0.1.nip.io:32000 \
         --exec-arg=--oidc-client-id=kubelogin-test \
         --exec-arg=--oidc-extra-scope=email \
         --exec-arg=--oidc-extra-scope=profile \
@@ -62,13 +63,13 @@ if [[ "${TYPE}" == "password" ]]; then
         --exec-arg=--oidc-client-secret=kubelogin-test-secret \
         --exec-arg=--grant-type=password \
         --exec-arg=-v1
-else
+elif [[ "${TYPE}" == "device-code" ]]; then
     kubectl config set-credentials oidc \
         --exec-api-version=client.authentication.k8s.io/v1beta1 \
         --exec-command=kubectl \
         --exec-arg=oidc-login \
         --exec-arg=get-token \
-        --exec-arg=--oidc-issuer-url=https://dex.example.com:32000 \
+        --exec-arg=--oidc-issuer-url=https://dex.127.0.0.1.nip.io:32000 \
         --exec-arg=--oidc-client-id=kubelogin-test \
         --exec-arg=--oidc-extra-scope=email \
         --exec-arg=--oidc-extra-scope=profile \
@@ -78,6 +79,9 @@ else
         --exec-arg=--oidc-pkce-method=S256 \
         --exec-arg=--grant-type=device-code \
         --exec-arg=-v1
+else
+    echo "error: unknown type '${TYPE}', expected 'password' or 'device-code'"
+    exit 1
 fi
 cat <<EOF
 Done!

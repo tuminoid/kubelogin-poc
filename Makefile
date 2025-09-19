@@ -3,14 +3,38 @@
 SHELL := /bin/bash
 KIND_CLUSTER := kubelogin-poc
 
-.PHONY: all check-tools run run-pkce clean
+# Tool versions
+KUBELOGIN_VERSION := v1.34.1
+KIND_VERSION := v0.30.0
+INSTALL_DIR := /usr/local/bin
+
+# OS and architecture detection
+OS := $(shell uname -s | tr '[:upper:]' '[:lower:]')
+ARCH := $(shell uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')
+
+.PHONY: all check-tools install-tools run run-pkce clean
 
 all: check-tools
-	@echo "targets: run run-pkce clean"
+	@echo "targets: run run-pkce clean install-tools"
 
 check-tools:
-	@type -a kubectl-oidc_login &>/dev/null || echo "error: Install kubelogin: https://github.com/int128/kubelogin/releases"
-	@type -a kind &>/dev/null || echo "error: Install kind: https://kind.sigs.k8s.io/docs/user/quick-start/"
+	@type -a kubectl-oidc_login &>/dev/null || echo "error: forgot to run 'make install-tools'?"
+	@type -a kind &>/dev/null || echo "error: forgot to run 'make install-tools'?"
+
+install-tools:
+	@echo "Installing tools to $(INSTALL_DIR)..."
+	@mkdir -p $(INSTALL_DIR)
+
+	echo "Installing kubelogin $(KUBELOGIN_VERSION)..."; \
+	curl -sSL -o /tmp/kubelogin.zip "https://github.com/int128/kubelogin/releases/download/$(KUBELOGIN_VERSION)/kubelogin_$(OS)_$(ARCH).zip"; \
+	unzip -q -o /tmp/kubelogin.zip -d /tmp; \
+	sudo install -m 755 /tmp/kubelogin $(INSTALL_DIR)/kubectl-oidc_login; \
+	rm -f /tmp/kubelogin.zip /tmp/kubelogin
+
+	echo "Installing kind $(KIND_VERSION)..."; \
+	curl -sSL -o /tmp/kind "https://kind.sigs.k8s.io/dl/$(KIND_VERSION)/kind-$(OS)-$(ARCH)"; \
+	sudo install -m 755 /tmp/kind $(INSTALL_DIR)/kind; \
+	rm -f /tmp/kind
 
 run: check-tools
 	./run.sh password
@@ -21,3 +45,13 @@ run-pkce: check-tools
 clean:
 	kind delete cluster --name $(KIND_CLUSTER)
 	rm -rf ~/.kube/cache/oidc-login
+
+logs:
+	echo "LDAP logs:"
+	kubectl -n openldap logs deployments/openldap | tail -20
+	echo
+	echo "Dex logs:"
+	kubectl -n dex logs deployments/dex | tail -20
+	echo
+	echo "K8s apiserver logs:"
+	kubectl logs -n kube-system kube-apiserver-kubelogin-poc-control-plane | tail -20
