@@ -40,7 +40,6 @@ spec:
           value: dc=example,dc=org
         - name: LDAP_ADMIN_DN
           value: cn=admin,dc=example,dc=org
-status: {}
 ---
 apiVersion: v1
 kind: Service

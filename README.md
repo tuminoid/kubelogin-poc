@@ -12,9 +12,12 @@ Upstream documentation:
 
 ## Kubelogin installation
 
-Get the binary from
-[releases](https://github.com/int128/kubelogin/releases/tag/v1.28.0), and
-install as `kubectl-oidc_login` in `/usr/local/bin` or elsewhere in `$PATH`.
+We need Kubelogin and Kind installed. Run `make install-tools` to install them.
+
+## Makefile
+
+Check the Makefile for targets. Notably, `make run` will run the password grant
+setup, and `make run-pkce` will run the device-code setup.
 
 ## Cluster POC
 
@@ -65,18 +68,16 @@ For Dex, we also add LDAP connector configuration and set `passwordConnector` to
 `ldap`.
 
 You also need to input key and certificate from `gencert.sh` into
-`dex.example.com.tls` Secret for this test setup. These certs must be same as
+`dex.127.0.0.1.nip.io.tls` Secret for this test setup. These certs must be same as
 the generated CA certificate in previous step. Using expired or non-trusted
 certificates causes apiserver not trust Dex, and login attempts will fail even
 if the Dex token kubectl gained is valid.
 
-We also need to add a line to `/etc/hosts` to create fake Dex domain:
-`127.0.0.1       dex.example.com` or simply change all occurrences of
-`dex.example.com` with `127.0.0.1`. Here we use the `dex.example.com` in order
-to make a difference between Dex host and other services.
-
 Depending on the connector and grant type you want to configure, choose the
 appropriate configs below.
+
+We'll use built-in Gomplate to template the Dex config from mounted secrets to
+avoid exposing passwords in environment variables.
 
 #### Password connector
 
