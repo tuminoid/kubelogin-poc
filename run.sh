@@ -26,7 +26,7 @@ echo "applying dex-${TYPE}.yaml ..."
 kubectl apply -f "k8s/dex-${TYPE}.yaml"
 echo "Creating Dex TLS secret..."
 kubectl -n dex create secret tls dex.127.0.0.1.nip.io.tls \
-    --cert="${SSLDIR}/dex.crt" --key="${SSLDIR}/dex.key"
+    --cert=./ssl/dex.crt --key=./ssl/dex.key
 
 echo "applying openldap.yaml ..."
 kubectl apply -f k8s/openldap.yaml

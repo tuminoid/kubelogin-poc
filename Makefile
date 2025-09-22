@@ -12,10 +12,10 @@ INSTALL_DIR := /usr/local/bin
 OS := $(shell uname -s | tr '[:upper:]' '[:lower:]')
 ARCH := $(shell uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')
 
-.PHONY: all check-tools install-tools run run-pkce clean
+.PHONY: all check-tools install-tools run run-pkce clean client
 
 all: check-tools
-	@echo "targets: run run-pkce clean install-tools"
+	@echo "targets: run run-pkce clean install-tools client"
 
 check-tools:
 	@type -a kubectl-oidc_login &>/dev/null || echo "error: forgot to run 'make install-tools'?"
@@ -55,3 +55,12 @@ logs:
 	echo
 	echo "K8s apiserver logs:"
 	kubectl logs -n kube-system kube-apiserver-kubelogin-poc-control-plane | tail -20
+
+client:
+	@echo "Building and running OAuth2 test client..."
+	@echo "Clearing old token cache and getting fresh tokens..."
+	rm -rf ~/.kube/cache/oidc-login
+	kubectl --user oidc get pods -A
+	@echo "Running test client with fresh tokens..."
+	cd client && go build -o test-client test-client.go
+	cd client && time ./test-client
