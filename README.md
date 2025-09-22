@@ -10,6 +10,16 @@ Upstream documentation:
 - <https://openid.net/specs/openid-connect-core-1_0.html#Claims>
 - <https://dexidp.io/docs/custom-scopes-claims-clients/>
 
+## Token Lifecycle and Testing
+
+For detailed information about OAuth2 token types, refresh mechanisms, testing
+scenarios, and production configuration recommendations, see:
+
+[Token expiry](client/README.md) documentation:
+
+- Token types and relationships (Access/ID, Refresh tokens)
+- Token refresh rotation and expiry configuration
+
 ## Kubelogin installation
 
 We need Kubelogin and Kind installed. Run `make install-tools` to install them.
@@ -285,4 +295,4 @@ kubectl create clusterrolebinding oidc-dex-group \
 
 LDAP configuration would be different per organization regardless.
 
-<!-- cSpell:ignore apiserver,kubelogin,endpoint,nodeport,pkce -->
+<!-- cSpell:ignore apiserver,kubelogin,endpoint,nodeport,pkce,gomplate -->
